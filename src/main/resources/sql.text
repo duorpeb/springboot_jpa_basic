@@ -1,0 +1,9 @@
+-- 2025.06.23
+  -- sbuser 의 pwd : mysql
+
+# DB 생성
+CREATE DATABASE sbdb_jpa;
+
+# sbdb 생성 시 생성했던 sbuser 에게 권한 부여
+GRANT ALL PRIVILEGES ON sbdb_jpa.* TO 'sbuser'@'localhost';
+FLUSH PRIVILEGES;

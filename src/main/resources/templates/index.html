@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<!-- layout:decorate="~{layout/layout}
+  > 현재 페이지가 layout/layout.html 템플릿을 기반으로 렌더링되도록 지정한다는 의미
+
+  > <div layout:fragment="content"> 으로 인해 layout/layout.html 내의 특정 위치 (layout:fragment="content") 에
+    현재 페이지의 내용이 layout:fragment="content" 형태로 삽입
+
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}"
+>
+
+<div class="container-md" layout:fragment="content">
+  <h1>index Page</h1>
+</div>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!-- thymeleaf 링크
+
+  > xmlns:th="http://www.thymeleaf.org" 은 thymeleaf 를 사용하겠다는 구문
+
+  > xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 은 fragment 를 사용할 것을 명시하는 구문
+
+    # build.gradle 의 <dependencies> 에 있는 implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect' 에서
+      'nz.net.ultraq' 을 역순으로 작성
+
+  ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spring Boot JPA</title>
+  <!-- BootStrap CSS, JS 링크 연결은 여기서 -->
+  <link rel="stylesheet" th:href="@{/dist/css/bootstrap.min.css}">
+  <script th:src="@{/dist/js/bootstrap.bundle.min.js}"></script>
+  <th:block layout:fragment="pageCss"></th:block>
+</head>
+<body>
+<!--/* fragment 조각을 사용 하는 경우, <div th:replace="배치할 파일의 경로 :: 이름"> 로 작성*/-->
+<!-- fragment - header -->
+<div th:replace="~{fragments/header :: header}">
+
+</div>
+
+<!-- fragment - content-->
+<div layout:fragment="content">
+
+</div>
+
+<!-- fragment - footer -->
+<div th:replace="~{fragments/footer :: footer}">
+
+</div>
+
+</body>
+</html>

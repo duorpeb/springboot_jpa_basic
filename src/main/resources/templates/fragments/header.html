@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extra/spring-security"
+>
+
+<!-- fragment 임을 명시하는 구문 - /* th:fragment="이름" : layout 에서 사용할 조각 */ -->
+<div th:fragment="header">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" th:href="@{/}">
+        <img th:src="@{/img/springboot_logo.png}" style="width : 40px; height : 40px;">
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <!-- 홈 -->
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" th:href="@{/}">홈</a>
+          </li>
+
+          <!-- 게시물 작성 -->
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" th:href="@{/board/register}">게시물 작성</a>
+          </li>
+
+          <!-- 전체 게시물 조회 -->
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" th:href="@{/board/list}">전체 게시물</a>
+          </li>
+
+
+        </ul>
+      </div>
+    </div>
+  </nav>
+</div>

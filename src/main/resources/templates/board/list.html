@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}"
+>
+<div class="container-md" layout:fragment="content">
+  <h1>Board List</h1>
+
+  <div>[[${list}]]</div>
+
+  <!-- 검색 -->
+  <form action="/board/list" class="d-flex" role="search" style="justify-content : space-between">
+    <!--<input type="hidden" name="pageNo" th:value="1">-->
+
+    <select class="form-select" aria-label="Default select example" style="width : 250px;" name="type">
+      <option th:selected="${ph.type eq null ? true : false}">---선택---</option>
+      <option th:value="twc" th:selected="${ph.type eq 'twc' ? true : false}">---전체---</option>
+      <option th:value="t" th:selected="${ph.type eq 't' ? true : false}">제목</option>
+      <option th:value="w" th:selected="${ph.type eq 'w' ? true : false}">작성자</option>
+      <option th:value="c" th:selected="${ph.type eq 'c' ? true : false}">내용</option>
+      <option th:value="tc" th:selected="${ph.type eq 'tc' ? true : false}">제목 + 내용</option>
+      <option th:value="wc" th:selected="${ph.type eq 'wc' ? true : false}">작성자 + 내용</option>
+      <option th:value="tw" th:selected="${ph.type eq 'tw' ? true : false}">제목 + 작성자</option>
+    </select>
+
+    <div style="display : flex;">
+      <input
+        class="form-control me-2"
+        type="search"
+        name="keyword"
+        placeholder="Search"
+        th:value="${ph.keyword}"
+        aria-label="Search"
+        style="width : 300px;"
+      />
+
+      <button type="submit" class="btn btn-primary position-relative" >
+        Search
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+          [[${ph.ttc}]]
+          <span class="visually-hidden">unread messages</span>
+        </span>
+      </button>
+    </div>
+  </form>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">제목</th>
+        <th scope="col">작성자</th>
+        <th scope="col">작성일시</th>
+      </tr>
+    </thead>
+    <tbody>
+    <th:block th:each="bvo:${list}">
+      <tr>
+        <!-- 쿼리스트링으로 복수 파라미터를 전달하는 경우
+          > /* <a th:href="@{/search(keyword=${keyword}, page=${page})}">검색</a> 형태로 작성 */
+        -->
+        <th scope="col"><a th:href="@{/board/detail(bno=${bvo.bno})}">[[${bvo.title}]]</a></th>
+        <th scope="col">[[${bvo.writer}]]</th>
+        <!-- /* "${#temporals.format(bdto.regDate, 'yyyy-MM-dd')}" */ -->
+        <th scope="col">[[${#temporals.format(bvo.regDate, 'yyyy.MM.dd 　hh:mm')}]]</th>
+      </tr>
+    </th:block>
+    </tbody>
+  </table>
+
+  <!-- 페이지네이션 -->
+  <!-- thymeleaf 에서의 동적 클래스 추가 -->
+  <div>
+    <nav aria-label="Page navigation example">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${ph.hasPrev eq false ? 'disabled' : ''}">
+          <a
+            class="page-link"
+            th:href="@{/board/list(pageNo=${ph.startIdx - 1}, type=${ph.type}, keyword=${ph.keyword})}"
+          >
+            이전
+          </a>
+        </li>
+
+        <!-- /* begin end 옵션이 없기에 ${numbers.sequence(from, to)} 를 사용해야 함 */ -->
+        <th:block th:each="i:${#numbers.sequence(ph.startIdx, ph.endIdx)}">
+          <li class="page-item" th:classappend="${ph.pageNo eq i ? 'active' : ''}">
+            <a
+              class="page-link"
+              th:href="@{/board/list(pageNo=${i}, type=${ph.type}, keyword=${ph.keyword})}">
+              [[${i}]]
+            </a>
+          </li>
+        </th:block>
+
+        <li class="page-item" th:classappend="${ph.hasNext eq false ? 'disabled' : ''}">
+          <a
+            class="page-link"
+            th:href="@{/board/list(pageNo=${ph.endIdx + 1}, type=${ph.type}, keyword=${ph.keyword})}"
+          >
+            다음
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
