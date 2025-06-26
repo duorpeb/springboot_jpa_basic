@@ -24,6 +24,8 @@ repositories {
 }
 
 dependencies {
+	// Thumbnailator - https://mvnrepository.com/artifact/net.coobird/thumbnailator
+	implementation 'net.coobird:thumbnailator:0.4.20'
 	// Querydsl APT https://mvnrepository.com/artifact/com.querydsl/querydsl-apt
 	implementation 'com.querydsl:querydsl-apt:5.0.0'
 	// Querydsl

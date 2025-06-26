@@ -62,13 +62,6 @@ public class PagingHandler {
     this.ttc = list.getTotalElements();
      // 전체 페이지 개수
     this.ttcPage = list.getTotalPages();
-     // 페이지네이션 페이징 단위 정의 (e.g., 페이징 단위가 10일 경우 (qty=10) 1~10, 11~20, ...)
-    this.endIdx = (int)Math.ceil(this.pageNo/5.0)*5;
-    this.startIdx = endIdx - 5;
-     // 전체 데이터 개수만큼 마지막 페이지 설정
-    this.endIdx = (endIdx > ttcPage) ? ttcPage : endIdx;
-     // 이전, 다음 초기화
-    this.hasNext = this.endIdx < this.ttc;
      /** 댓글 리스트 초기화
       *
       *   > getContent() 는 현재 요청한 “페이지” 안에 담긴 실제 엔티티(또는 DTO) 목록을

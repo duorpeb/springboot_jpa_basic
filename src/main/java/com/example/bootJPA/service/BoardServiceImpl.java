@@ -1,8 +1,12 @@
 package com.example.bootJPA.service;
 
+import com.example.bootJPA.dto.BoardAndFileDTO;
 import com.example.bootJPA.dto.BoardDTO;
+import com.example.bootJPA.dto.FileDTO;
 import com.example.bootJPA.entity.Board;
+import com.example.bootJPA.entity.File;
 import com.example.bootJPA.repository.BoardRepository;
+import com.example.bootJPA.repository.FileRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +26,23 @@ import java.util.Optional;
 public class BoardServiceImpl implements BoardService{
   // 초기화
   private final BoardRepository boardRepository;
+  private final FileRepository fileRepository;
+
+
+  /* fileDel(String uuid)
+  *
+  * */
+  @Override
+  public boolean fileDel(String uuid) {
+    Optional<File> optionalFile = fileRepository.findById(uuid);
+
+    if(optionalFile.isPresent()){
+      fileRepository.deleteById(uuid);
+      return true;
+    }
+
+    return false;
+  }
 
 
   /** getList() - 검색이 추가된 페이지네이션
@@ -40,6 +61,7 @@ public class BoardServiceImpl implements BoardService{
     return result;
   }
 
+
  /* @Override
   public Board convertDtoToEntity(BoardDTO bdto) {
     return BoardService.super.convertDtoToEntity(bdto);
@@ -57,9 +79,20 @@ public class BoardServiceImpl implements BoardService{
    *  > save() 는 insert, update 의 역할을 수행하며 entity 객체를 Parameter 로 전송
    *
    * */
+  @Transactional
   @Override
-  public Long insert(BoardDTO bdto) {
-    return boardRepository.save(convertDtoToEntity(bdto)).getBno();
+  public Long insert(BoardAndFileDTO bdto) {
+    // bdto 삽입
+    Long bno = boardRepository.save(convertDtoToEntity(bdto.getBdto())).getBno();
+
+    if(bno > 0 && bdto.getFdtoList()!= null){
+      for(FileDTO f : bdto.getFdtoList()){
+        f.setBno(bno);
+        bno = fileRepository.save(convertDtoToEntity(f)).getBno();
+      }
+    }
+
+    return bno;
   }
 
 
@@ -122,28 +155,43 @@ public class BoardServiceImpl implements BoardService{
   }
 
 
-  /** getDetail() - 게시물 상세 조회
+  /**
+   * getDetail() - 게시물 상세 조회
    *
-   *  > findBy() 를 사용하는 경우 Optional Board 형태로 반환
+   *    > findBy() 를 사용하는 경우 Optional Board 형태로 반환
    *
-   *  > Optional 이란 자바 8에 도입된 컨테이너 클래스로 내부에 값이 있거나 (Optional.of(value))
-   *    없거나(Optional.empty()) 둘 중 하나의 상태만 가질 수 있음
+   *    > Optional 이란 자바 8에 도입된 컨테이너 클래스로 내부에 값이 있거나 (Optional.of(value))
+   *      없거나(Optional.empty()) 둘 중 하나의 상태만 가질 수 있음
    *
-   *    # 값을 직접 꺼내기 전에 존재 여부를 강제 체크하도록 유도하여 NPE(NullPointerException) 을 방지하는 컨테이너 클래스
+   *      # 값을 직접 꺼내기 전에 존재 여부를 강제 체크하도록 유도하여 NPE(NullPointerException) 을
+   *        방지하는 컨테이너 클래스
    *
-   *    # Optional.isEmpty() 는 null 인 경우 true, null 이 아닌 경우 false 를 반환
+   *      # Optional.isEmpty() 는 null 인 경우 true, null 이 아닌 경우 false 를 반환
    *
-   *    # Optional.isPresent() 는 값이 있는지를 확인하고 있다면 true 없다면 false 를 반환
+   *      # Optional.isPresent() 는 값이 있는지를 확인하고 있다면 true 없다면 false 를 반환
    *
-   *    # Optional.get 은() 객체를 가져옴
+   *      # Optional.get 은() 객체를 가져옴
    */
+  @Transactional
   @Override
-  public BoardDTO getDetail(long bno) {
+  public BoardAndFileDTO getDetail(long bno) {
     // DB 객체로 받아와 View 객체로 반환
     Optional<Board> optionBd = boardRepository.findById(bno);
 
     if(optionBd.isPresent()){
-      return convertEntitytoDto(optionBd.get());
+      // bno 에 일치하는 BoardDTO 가져오기
+      BoardDTO bdto = convertEntitytoDto(optionBd.get());
+
+      // bno 에 일치하는 File List 가져오기
+      List<File> fileList = fileRepository.findByBno(bno);
+
+      // File -> FileDTO
+      List<FileDTO> fdtoList = fileList.stream().map(this::convertEntityToDto).toList();
+
+      // BoardAndFileDTO 생성
+      BoardAndFileDTO badto = new BoardAndFileDTO(bdto, fdtoList);
+
+      return badto;
     }
 
     return null;
@@ -190,7 +238,7 @@ public class BoardServiceImpl implements BoardService{
   * */
   @Transactional
   @Override
-  public Long modify(BoardDTO bdto) {
+  public Long modify(BoardAndFileDTO badto) {
     /* Case B) @Transactional 을 사용한 수정 - @Transactional Annotation 추가 */
      /* DB 저장용 객체 초기화 방법 - 1)
      *
@@ -204,12 +252,20 @@ public class BoardServiceImpl implements BoardService{
     *   > DB 저장용 객체 초기화 방법 1을 아래처럼 한 줄로 작성 가능
     *
     * */
+    BoardDTO bdto = badto.getBdto();
     Board bd = boardRepository.findById(bdto.getBno()).orElseThrow(
         () -> new EntityNotFoundException("존재하지 않는 게시글입니다!"));
 
      // UPDATE 작업 수행
     bd.setTitle(bdto.getTitle());
     bd.setContent(bdto.getContent());
+
+    if(badto.getFdtoList() != null ){
+      for(FileDTO fdto : badto.getFdtoList()){
+        fdto.setBno(bdto.getBno());
+        Long bno = fileRepository.save(convertDtoToEntity(fdto)).getBno();
+      }
+    }
 
     return bd.getBno();
 

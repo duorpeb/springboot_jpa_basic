@@ -1,6 +1,10 @@
 package com.example.bootJPA.controller;
 
+import com.example.bootJPA.dto.BoardAndFileDTO;
 import com.example.bootJPA.dto.BoardDTO;
+import com.example.bootJPA.dto.FileDTO;
+import com.example.bootJPA.entity.Board;
+import com.example.bootJPA.handler.FileHandler;
 import com.example.bootJPA.handler.PagingHandler;
 import com.example.bootJPA.service.BoardService;
 import lombok.Getter;
@@ -9,10 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
@@ -26,22 +28,44 @@ import java.util.List;
 public class BoardController {
   // 초기화
   private final BoardService bsv;
+  private final FileHandler fh;
 
   // Mapping
   @GetMapping("/register")
   public void register(){}
 
+  /** 파일이 있는 경우의 insert
+   *
+   *
+   * */
+  @PostMapping("/insert")
+  public String insert(BoardDTO bdto, @RequestParam(name = "file", required = false)MultipartFile[] files){
+    // Init
+    List<FileDTO> fdtoList = null;
+
+    if(files != null && files[0].getSize() > 0){
+      // 파일 핸들러 작업
+      fdtoList = fh.upFiles(files);
+    }
+
+    Long bno = bsv.insert(new BoardAndFileDTO(bdto, fdtoList));
+
+    return "redirect:/board/list";
+  }
+
+
+/* 파일이 없는 경우의 insert
   @PostMapping("/insert")
   public String insert(BoardDTO bdto){
-    /**
+    *//**
      *  > 이전의 MyBatis 에서는 insert, update, delete 는 Query 의 실행으로 영향을 받은 ROW 의 개수를 Return
      *    했지만 JPA 는 id 를 return
-     * */
+     * *//*
     Long bno = bsv.insert(bdto);
     log.info("BoardController 의 insert 시 반환받은 id : {}", bno);
 
     return "/index";
-  }
+  }*/
 
 
   /* public void list(Model m){ ... }
@@ -101,9 +125,9 @@ public class BoardController {
      *  > 이전의 MyBatis 에서는 insert, update, delete 는 Query 의 실행으로 영향을 받은 ROW 의 개수를 Return
      *    했지만 JPA 는 id 를 return
      * */
-    BoardDTO bdto = bsv.getDetail(bno);
+    BoardAndFileDTO bAfDto = bsv.getDetail(bno);
 
-    m.addAttribute("bdto", bdto);
+    m.addAttribute("bAfDto", bAfDto);
   }
 
   
@@ -123,14 +147,36 @@ public class BoardController {
   * 
   * */
   @PostMapping("/modify")
-  public String modify(BoardDTO bdto, RedirectAttributes re){
+  public String modify(BoardDTO bdto, RedirectAttributes re, @RequestParam(name = "file", required = false)
+                       MultipartFile[] files){
     // 확인
     log.info("/modify 의 bdto : {}", bdto);
 
-    Long isOk = bsv.modify(bdto);
+    // 초기화
+    List<FileDTO> fdtoList = null;
+
+    if(files != null && files[0].getSize() > 0){
+      fdtoList = fh.upFiles(files);
+    }
+
+    Long isOk = bsv.modify(new BoardAndFileDTO(bdto, fdtoList));
 
     /*re.addAttribute("bno", bdto.getBno());*/
 
     return "redirect:/board/detail?bno=" + bdto.getBno();
+  }
+
+
+  /* @DeleteMapping("/fileDel") - 파일 삭제
+  *
+  * */
+  @ResponseBody
+  @DeleteMapping
+  public String fileDel(@RequestParam("uuid") String uuid){
+    String isOk = "";
+
+    if(bsv.fileDel(uuid)){ isOk = "1"; }
+
+    return isOk;
   }
 }

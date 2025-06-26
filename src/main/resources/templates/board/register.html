@@ -7,7 +7,7 @@
 <div class="container-md" layout:fragment="content">
   <h1>Register Page</h1>
 
-  <form action="/board/insert" method="post">
+  <form action="/board/insert" method="post" enctype="multipart/form-data">
     <!-- csrf Token, Spring 과 달리 "th:" 꼭 붙여주어야 함!!!! -->
     <!--<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>-->
 
@@ -29,6 +29,17 @@
       <textarea type="text" class="form-control" name="content" id="c" cols="30" rows="10">test content...</textarea>
     </div>
 
+    <!-- Insert File -->
+    <div class="mb-3">
+      <label for="file" class="form-label"></label>
+      <input type="file" class="form-control" name="file" id="file" multiple style="display:none;">
+      <button type="button" class="btn btn-outline-primary" id="trigger">파일 선택</button>
+    </div>
+
+    <!-- print File's info -->
+    <div class="mb-3" id="fileZone"></div>
+
     <button type="submit" class="btn btn-primary" id="regBtn">게시물 등록</button>
   </form>
+  <script th:src="@{/js/bdReg.js}"></script>
 </div>

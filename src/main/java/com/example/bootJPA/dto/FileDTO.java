@@ -1,29 +1,28 @@
 package com.example.bootJPA.dto;
 
-import jakarta.persistence.Table;
+import com.example.bootJPA.entity.TimeBase;
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
 import lombok.*;
 
+import java.sql.Time;
 import java.time.LocalDateTime;
 
 import static com.example.bootJPA.converter.TimeConverter.timeOrDate;
 
-/** public class BoardDTO
- *
- * > BoardDTO 는 bno, title, writer, content, reg_date, mod_date 를 가짐
- *
- * */
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BoardDTO {
-  // 초기화
-  private Long bno;
-  private String title;
-  private String writer;
-  private String content;
+public class FileDTO {
+  private String uuid;
+  private String saveDir;
+  private String fileName;
+  private int fileType;
+  private long bno;
+  private long fileSize;
   private LocalDateTime regDate, modDate;
 
 

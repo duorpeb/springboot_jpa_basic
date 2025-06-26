@@ -262,7 +262,7 @@ function printCmtList(bno, page=1){
       // 더보기 버튼
       let moreBtn = document.getElementById('moreBtn');
 
-      if(result.pageNo < result.endIdx){
+      if(result.pageNo < result.ttcPage){
         moreBtn.style.visibility = 'visible';
 
         moreBtn.dataset.page = page + 1;
